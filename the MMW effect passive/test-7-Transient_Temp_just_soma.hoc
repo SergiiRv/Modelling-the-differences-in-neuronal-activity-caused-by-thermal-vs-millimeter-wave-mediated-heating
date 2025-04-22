@@ -1,0 +1,311 @@
+chdir("C:/the_model/") // insert here the the path to the folder you want it to run in
+
+objectvar fParam
+fParam = new File()
+ fParam.ropen("ParameterFile.txt")
+
+Param1 = fParam.scanvar()
+Param2 = fParam.scanvar()
+Param3 = fParam.scanvar()
+
+fParam.close()
+
+load_file("nrngui.hoc")
+load_file("electrod.hoc")
+load_file("pointman.hoc")
+load_file("4testDist.ses")
+
+//CREATING SOMA
+create soma
+
+objref diamV
+NsegSoma = 41 
+diamV = new Vector(NsegSoma)
+diamV.indgen(PI/(NsegSoma-1))
+
+soma{
+	nseg=NsegSoma-1
+	L = 40
+	Ra = 123
+	
+for i=0,NsegSoma-1 {
+	soma.diam((1/(NsegSoma-1))*i)=sin(diamV.x[i])*20+10 //DiamBranchSomaEndsFirst
+			}
+	soma.diam(1) = 10 //DiamBranchSomaEndsLast
+	
+	insert KdelRec
+	insert KChTransitIA
+	insert leak
+	insert NaChSTTS
+	insert NaChSTTR
+	insert na 
+	insert napump 
+	insert gkca 
+	insert ca 
+	insert cach 
+	insert capump
+}
+
+//////CHANNELS PARAMETERS
+
+//////////////////////// NaChSTTS
+forall	A_am_NaChSTTS = 0.0748
+forall	B_am_NaChSTTS = 61.44
+forall	C_am_NaChSTTS = 33.365
+
+forall	A_ah_NaChSTTS = 0.045       
+forall	B_ah_NaChSTTS = 58          
+forall	C_ah_NaChSTTS = 18 
+
+forall	A_bm_NaChSTTS = 4.103
+forall	B_bm_NaChSTTS = 19.483
+forall	C_bm_NaChSTTS = 15.549
+
+forall	A_bh_NaChSTTS = 0.72       
+forall	B_bh_NaChSTTS = 23          
+forall	C_bh_NaChSTTS = 14 
+
+forall	Vh_m_NaChSTTS = 24.5
+forall	Vs_m_NaChSTTS = 11.142 
+forall	Vh_h_NaChSTTS = 61.5 
+forall	Vs_h_NaChSTTS = 8.7
+
+forall	gnabar_NaChSTTS = 0.24*1.5
+
+/////////////////////// NaChSTTR
+forall	A_am_NaChSTTR = 0.0748
+forall	B_am_NaChSTTR = 61.44 
+forall	C_am_NaChSTTR = 33.365
+
+forall	A_ah_NaChSTTR = 0.045     
+forall	B_ah_NaChSTTR = 58         
+forall	C_ah_NaChSTTR = 18 
+
+forall	A_bm_NaChSTTR = 4.103      
+forall	B_bm_NaChSTTR = 19.483
+forall	C_bm_NaChSTTR = 15.549
+
+forall	A_bh_NaChSTTR = 0.72          
+forall	B_bh_NaChSTTR = 23             
+forall	C_bh_NaChSTTR = 14
+
+forall	Vh_m_NaChSTTR = 9
+forall	Vs_m_NaChSTTR = 12.56 
+forall	Vh_h_NaChSTTR = 32.71
+forall	Vs_h_NaChSTTR = 3.5
+
+forall	gnabar_NaChSTTR = 0.161*0.9
+forall	gkbar_KdelRec = 0.007
+forall	betanbarS_KdelRec = 0.017
+forall	alphanvh_KdelRec = 16
+
+
+/////////////////////////////// KChTransitIA
+forall	tauMmax_KChTransitIA = 1 
+forall	Vh1m_KChTransitIA = 35.82 
+forall	Vs1m_KChTransitIA = 19.69 
+forall	Vh2m_KChTransitIA = 79.69 
+forall	Vs2m_KChTransitIA = 12.2 
+forall	CMM_KChTransitIA = 0.37
+forall	VhMinf_KChTransitIA = 67
+forall	VsMinf_KChTransitIA = -1.5 
+forall	tauHmax_KChTransitIA = 1 
+forall	Vh1h_KChTransitIA = 46.05 
+forall	Vs1h_KChTransitIA = 0.67
+forall	Vh2h_KChTransitIA = 238.4 
+forall	Vs2h_KChTransitIA = 37.45 
+forall	CHH_KChTransitIA = 0
+forall	VhHinf_KChTransitIA = 88
+forall	VsHinf_KChTransitIA = 6
+forall	gkbar_KChTransitIA = 0.028
+
+////////////////////////// gkca
+forall		alphabar_gkca = 0.1
+forall		alphaB_gkca = 0.01
+forall		betabar_gkca = 0.043
+forall    gkcabar_gkca = 0.0015
+ 
+////////////////////////////// napump	
+		
+forall      ksteep_napump = 1
+forall		  vmax_napump = 0.003
+forall	   	khalf_napump = 12
+forall			Ksrink_napump = 1 
+
+////////////////////////////////CaCh
+
+forall		gcabar_cach = 2e-06
+
+///////////////////////////////////// CaPump
+
+forall tau_capump = 120(ms)
+forall Ksrink_capump = 1
+__________________________________________________________________________________________________
+// TEMPERATURE COEF. Q10
+
+forall	amQ10NaTTXR_NaChSTTR = 3.8
+forall	bmQ10NaTTXR_NaChSTTR = 3.6
+forall	ahQ10NaTTXR_NaChSTTR = 2.5
+forall	bhQ10NaTTXR_NaChSTTR = 2.3
+forall	gbarQ10NaTTXR_NaChSTTR = 1.35
+
+forall	amQ10NaTTXR_NaChSTTS = 3.4
+forall	bmQ10NaTTXR_NaChSTTS = 3.2
+forall	ahQ10NaTTXR_NaChSTTS = 2.5
+forall	bhQ10NaTTXR_NaChSTTS = 2.3
+forall	gbarQ10NaTTXR_NaChSTTS = 1.35
+
+forall	Q10KdelRec_KdelRec = 2.3
+forall	gbQ10KdelRec_KdelRec = 1.35
+
+forall	Q10KiA_KChTransitIA = 2.75
+forall	gbQ10KiA_KChTransitIA = 1.44
+forall	Q10KCa_gkca = 2.4 
+
+access	soma 
+el_leak = -43 
+gl_leak = 0.00062
+KCK_leak = 0.001 
+LeakTermCoef_leak = 1.44
+	
+//TIME VECTOR			
+Tstart = 0			
+tstop = 3000//5000
+dt = 0.025
+Delayx = 1000//2000
+objref Vtime, Universal, Universall, Universalx, UniRamp, g, gg, ggg, TempRamp, TempRampCop
+Vtime = new Vector()
+Vtime.indgen(Tstart,tstop,dt)
+print "timevector is ok   ", "length of vtime =", Vtime.size()
+Universalx = new Vector(Delayx/dt, 0)
+print "length of Universalx =", Universalx.size()
+UniRamp = new Vector((tstop-Delayx)/dt, 0)
+print "length of UniRamp =", UniRamp.size()
+UniRamp.indgen().scale(0, 1)
+Universal = new Vector()
+Universall = new Vector()
+Universall.append(Universalx, UniRamp)
+Universal.append(Universall,1)
+print "length of Universal =", Universal.size()
+
+objref MMWVUniv, MMWVUniv1, MMWVUniv0, LeakTermCoefV1, KsrinkCaPV2, KsrinkNaKPV2, KGKCabar, MMWg, MMWg2
+MMWVUniv1 = new Vector(Delayx/dt, 1)
+MMWVUniv0 = new Vector((tstop-Delayx)/dt+1, 0)
+MMWVUniv = new Vector()
+MMWVUniv.append(MMWVUniv1, MMWVUniv0)
+print "length of MMWVUniv =", MMWVUniv.size()
+
+MMWVUniv0.indgen().scale(0, 1)
+
+LeakTermCoefV1 = new Vector()
+KsrinkCaPV2 = new Vector()
+KsrinkNaKPV2 = new Vector()
+KGKCabar = new Vector()
+
+SetCelsius = 20
+celsius = SetCelsius 
+deltacelsius = Param3 //30//3
+deltacelsiusLimit = 10//3
+print "SetCelsius= ", SetCelsius
+TempRamp  = new Vector(Universal.size())
+TempRamp = Universal.c.mul(deltacelsius).c.add(SetCelsius)
+print "TempRamp is ok   ", "length of TempRamp =", TempRamp.size()
+//limiting the temperature increase by Tfinal temperature to keep the simulation stable
+Tlimit = SetCelsius + deltacelsiusLimit
+for iii=0, TempRamp.size()-1 {
+	 	if (TempRamp.x[iii]>Tlimit) { 
+		TempRamp.x[iii] = Tlimit	
+		}
+}		
+print "length of TempRamp =", TempRamp.size()
+
+TempRampCop = new Vector(TempRamp.size())
+TempRampCop = TempRamp.c.mul(1)
+TempRampCop.scale(0, 1)
+LeakTermCoefV1 = TempRampCop.c.mul(Param1*gl_leak).c.add(gl_leak)
+print "length of LeakTermCoefV1 =", LeakTermCoefV1.size()
+
+MMWg = new Graph()	
+LeakTermCoefV1.line(MMWg)
+LeakTermCoefV1.play("forall gl_leak=$1", Vtime)
+
+
+g = new Graph()	
+TempRamp.line(g)
+// PLAY WITH A TEMPERATURE
+TempRamp.play(&celsius, Vtime) 
+
+// PLAY WITH CAPASITANCE
+objref CapVec, UniversalCm
+CapVec = new Vector()
+UniversalCm = new Vector()
+deltacapsSR = Param2 
+basecapsSR = 1 // cm initial
+UniversalCm.copy(TempRamp)
+UniversalCm.scale(0, 1)
+CapVec = UniversalCm.c.mul(deltacapsSR).c.add(basecapsSR)
+CapVec.play("forall cm=$1", Vtime)                                 // update the Cm as in tv every Dt
+CapVec.play("soma {cml_leak=$1}", Vtime) 
+
+print "run the system is ok"
+
+// SAVING THE DATA
+objref rect, recv, recTemp, recI, recLeak_dC
+
+rect = new Vector()
+rect.record(&t)
+recTemp = new Vector()
+recTemp.record(&celsius)
+recv = new Vector()
+recLeak_dC = new Vector()
+recI = new Vector()
+recv.record(&soma.v(0.5))
+recLeak_dC.record(&soma.il_leak(0.5))
+recI.record(&soma.i_cap(0.5))
+
+recsize = tstop/dt+1
+
+objref TimeTempSomaVI
+TimeTempSomaVI = new Matrix()
+TimeTempSomaVI.resize(recsize,5)
+
+init()
+run()
+
+TimeTempSomaVI.setcol(0, rect)
+TimeTempSomaVI.setcol(1, recv)
+TimeTempSomaVI.setcol(2, recTemp)
+TimeTempSomaVI.setcol(3, recI)
+TimeTempSomaVI.setcol(4, recLeak_dC)
+
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Soma_Temp.txt")
+TimeTempSomaVI.fprint(savdata, "%g\t")
+savdata.close()
+
+// working with the flag file to support multyrun
+print "Reading the flag"
+
+objref VecFlag
+VecFlag = new Vector(1, 1)
+VecFlag.x[0] = 1
+
+objref savFlag
+savFlag = new File()
+
+savFlag.ropen("C:/the_model_3/FlagFile.txt")
+Flag = savFlag.scanvar()
+print "Flag = ", Flag
+savFlag.close()
+
+print "The new Flag is = ", VecFlag.x[0]
+objref savFlag
+savFlag = new File()
+savFlag.wopen("C:/the_model_3/FlagFile.txt")
+VecFlag.printf(savFlag, "%e")
+savFlag.close()
+
+print "Flag is set"
+quit()
+

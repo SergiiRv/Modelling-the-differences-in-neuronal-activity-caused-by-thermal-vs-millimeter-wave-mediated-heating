@@ -1,0 +1,753 @@
+chdir("C:/the_model/") // insert here the the path to the folder you want it to run in
+
+
+Param1 = 0//fParam.scanvar()
+Param2 = 0//fParam.scanvar()
+Param3 = 0//fParam.scanvar()
+//Param4 = fParam.scanvar()
+
+//fParam.close()
+
+
+load_file("nrngui.hoc")
+load_file("electrod.hoc")
+load_file("pointman.hoc")
+
+
+
+//____________________________________________________________________________________________________
+//MAKING THE AXONAL TREE
+n = 4  // number of brunching levels
+ns = 3 // number of branches per level
+banchsum = 0
+banchsumTotal = 0
+for i=0,n {
+	banchsum = banchsum+ns^i
+	}
+print "number of axons =", banchsum
+create axon[banchsum]
+
+banchsumAxon = banchsum
+banchsumTotal = banchsumTotal+banchsumAxon
+
+objectvar faxon
+faxon = new File()
+ faxon.ropen("myAxonTreeTansfer.txt")
+ 
+ axon[0] {
+		nseg = 1 // start with this number, to be changed after reassining the cooedinates
+        diam = 10 // arbitrary number, to be changed after reassining the cooedinates
+        L = 400//10 // arbitrary number, to be changed after reassining the cooedinates
+        Ra = 123
+		    x1 = faxon.scanvar()
+			y1 = faxon.scanvar()
+			z1 = faxon.scanvar()
+			x2 = faxon.scanvar()
+			y2 = faxon.scanvar()
+			z2 = faxon.scanvar()
+			DiamBranch = faxon.scanvar()
+			parent = faxon.scanvar()
+			print "The first Trunk Axon"
+	        print x1, y1, z1, x2, y2, z2, "DiamBranch=" , DiamBranch, "parent =", parent
+			pt3dclear()
+			pt3dadd(x1, y1, z1, DiamBranch)	
+			pt3dadd(x2, y2, z2, DiamBranch)
+				
+			print "number of points in section=", n3d()
+					
+	insert KdelRec
+	insert KChTransitIA
+	insert leak
+	insert NaChSTTS
+	insert NaChSTTR
+	insert na 
+	insert napump 
+	insert gkca 
+	insert ca 
+	insert cach 
+	insert capump
+		//
+		}
+	
+DiamBranchPrevious = DiamBranch
+DiamBranchSomaEndsFirst = DiamBranch
+		
+  for i = 1, banchsum-1 {
+	axon[i] {
+		nseg = 1 // start with this number, to be changed after reassining the cooedinates
+        diam = 10 // arbitrary number, to be changed after reassining the cooedinates
+        L = 10 // arbitrary number, to be changed after reassining the cooedinates
+        Ra = 123
+		
+		    x1 = faxon.scanvar()
+			y1 = faxon.scanvar()
+			z1 = faxon.scanvar()
+			x2 = faxon.scanvar()
+			y2 = faxon.scanvar()
+			z2 = faxon.scanvar()
+			DiamBranch = faxon.scanvar()
+			parent = faxon.scanvar()
+	        print x1, y1, z1, x2, y2, z2, "DiamBranch=" , DiamBranch, "parent =", parent
+						
+			pt3dclear()
+			pt3dadd(x1, y1, z1, DiamBranchPrevious)	
+			pt3dadd(x2, y2, z2, DiamBranch)
+			connect axon[i](0), axon[parent](1)
+	    	print "number of points=", n3d(), "iteration =", i
+			DiamBranchPrevious = axon[parent].diam
+			
+		
+	insert KdelRec
+	insert KChTransitIA
+	insert leak
+	insert NaChSTTS
+	insert NaChSTTR
+	insert na 
+	insert napump 
+	insert gkca 
+	insert ca 
+	insert cach 
+	insert capump
+		//
+		}
+	
+	}
+//SEGMENTISATION AXON
+for i = 0, banchsum-1 {
+	if (axon[i].L < 20) {
+			axon[i].nseg = 5
+			} else {
+			axon[i].nseg = 10
+			}
+	print "segmenting is ok, i =", i
+	}
+faxon.close()
+axon[0] {L = 100} // ELONGATION of AXONAL trunk
+/*	
+//MAKING THE DENDRITE TREE
+n = 3// 6  // number of brunching levels
+ns = 3 // number of branches per level
+banchsum = 0
+for i=0,n {
+	banchsum = banchsum+ns^i
+	}
+print "number of dendrite arborisations =", banchsum
+create dendrt[banchsum]
+
+banchsumDedrt = banchsum
+banchsumTotal = banchsumTotal+banchsumDedrt
+
+objectvar faxon
+faxon = new File()
+ faxon.ropen("myAxonDendtTansfer.txt")
+ 
+ dendrt[0] {
+		nseg = 1 // start with this number, to be changed after reassining the cooedinates
+        diam = 10 // arbitrary number, to be changed after reassining the cooedinates
+        L = 10 // arbitrary number, to be changed after reassining the cooedinates
+        Ra = 123
+		    x1 = faxon.scanvar()
+			y1 = faxon.scanvar()
+			z1 = faxon.scanvar()
+			x2 = faxon.scanvar()
+			y2 = faxon.scanvar()
+			z2 = faxon.scanvar()
+			DiamBranch = faxon.scanvar()
+			parent = faxon.scanvar()
+			print "The first Trunk dendrt"
+	        print x1, y1, z1, x2, y2, z2, "DiamBranch=" , DiamBranch, "parent =", parent
+			pt3dclear()
+			pt3dadd(x1, y1, z1, DiamBranch)	
+			pt3dadd(x2, y2, z2, DiamBranch)
+
+		//pt3dchange(1, x1, y1, z1, DiamBranch)
+		//pt3dchange(0, x2, y2, z2, DiamBranch)
+
+			print "number of points in section=", n3d()
+
+		//insert fastpas
+		
+		//____________________________________________
+		//
+	insert KdelRec
+	insert KChTransitIA
+	insert leakDndrt
+	insert NaChSTTS
+	insert NaChSTTR
+	insert na 
+	insert napump 
+	insert gkca 
+	insert ca 
+	insert cach 
+	insert capump
+	// the changes and increase of the conductivity from the soma to the end of dendrites is actual for KChTransitIA and maybe Ih (not yet present)
+		//
+		}
+	
+DiamBranchPrevious = DiamBranch
+DiamBranchSomaEndsLast = DiamBranch
+		
+  for i = 1, banchsum-1 {
+	dendrt[i] {
+		nseg = 1 // start with this number, to be changed after reassining the cooedinates
+        diam = 10 // arbitrary number, to be changed after reassining the cooedinates
+        L = 10 // arbitrary number, to be changed after reassining the cooedinates
+        Ra = 123
+		
+		    x1 = faxon.scanvar()
+			y1 = faxon.scanvar()
+			z1 = faxon.scanvar()
+			x2 = faxon.scanvar()
+			y2 = faxon.scanvar()
+			z2 = faxon.scanvar()
+			DiamBranch = faxon.scanvar()
+			parent = faxon.scanvar()
+	        print x1, y1, z1, x2, y2, z2, "DiamBranch=" , DiamBranch, "parent =", parent
+						
+			pt3dclear()
+			pt3dadd(x1, y1, z1, DiamBranchPrevious)	
+			pt3dadd(x2, y2, z2, DiamBranch)
+			connect dendrt[i](1), dendrt[parent](0)
+	    	print "number of points=", n3d(), "itration =", i
+			DiamBranchPrevious = dendrt[parent].diam
+			
+		//insert fastpas
+		
+		//____________________________________________
+		//
+	insert KdelRec
+	insert KChTransitIA
+	insert leakDndrt
+	insert NaChSTTS
+	insert NaChSTTR
+	insert na 
+	insert napump 
+	insert gkca 
+	insert ca 
+	insert cach 
+	insert capump
+	// the changes and increase of the conductivity from the soma to the end of dendrites is actual for KChTransitIA and maybe Ih (not yet present)
+		//
+		}
+
+	}
+	
+//SEGMENTISATION DENDRITE
+	for i = 0, banchsum-1 {
+	if (dendrt[i].L < 20) {
+			dendrt[i].nseg = 5
+			} else {
+			dendrt[i].nseg = 10
+			}
+	print "segmenting is ok, i =", i }	
+faxon.close()
+
+//_______________________________________________________________________________________________________	
+*/	
+	
+//CREATING SOMA
+create soma
+
+objref diamV
+NsegSoma = 41 
+diamV = new Vector(NsegSoma)
+diamV.indgen(PI/(NsegSoma-1))
+
+soma{
+	nseg=NsegSoma-1
+	L = 40
+	Ra = 123
+	
+for i=0,NsegSoma-1 {
+	soma.diam((1/(NsegSoma-1))*i)=sin(diamV.x[i])*20+10 //DiamBranchSomaEndsFirst
+			}
+	soma.diam(1) = 10 //DiamBranchSomaEndsLast
+	
+	//insert hh
+	
+	insert KdelRec
+	insert KChTransitIA
+	insert leak
+	insert NaChSTTS
+	insert NaChSTTR
+	insert na 
+	insert napump 
+	insert gkca 
+	insert ca 
+	insert cach 
+	insert capump
+		}
+
+
+//CONNECTING SOMA AND BRANCHES
+//connect  dendrt[0](1), soma(0)
+connect  soma(1), axon[0](0)
+
+
+
+/////////////////////////////////////////////////////	
+//forall Ra = 200
+/////////////////////////////////////////////////////
+
+//////CHANNELS PARAMETERS
+
+//////////////////////// NaChSTTS
+forall	A_am_NaChSTTS = 0.0748
+forall	B_am_NaChSTTS = 61.44
+forall	C_am_NaChSTTS = 33.365
+
+forall	A_ah_NaChSTTS = 0.045       
+forall	B_ah_NaChSTTS = 58          
+forall	C_ah_NaChSTTS = 18 
+
+forall	A_bm_NaChSTTS = 4.103
+forall	B_bm_NaChSTTS = 19.483
+forall	C_bm_NaChSTTS = 15.549
+
+forall	A_bh_NaChSTTS = 0.72       
+forall	B_bh_NaChSTTS = 23          
+forall	C_bh_NaChSTTS = 14 
+
+forall	Vh_m_NaChSTTS = 24.5
+forall	Vs_m_NaChSTTS = 11.142 
+forall	Vh_h_NaChSTTS = 61.5 
+forall	Vs_h_NaChSTTS = 8.7
+
+forall	gnabar_NaChSTTS = 0.24*1.5
+
+/////////////////////// NaChSTTR
+forall	A_am_NaChSTTR = 0.0748
+forall	B_am_NaChSTTR = 61.44 
+forall	C_am_NaChSTTR = 33.365
+
+forall	A_ah_NaChSTTR = 0.045     
+forall	B_ah_NaChSTTR = 58         
+forall	C_ah_NaChSTTR = 18 
+
+forall	A_bm_NaChSTTR = 4.103      
+forall	B_bm_NaChSTTR = 19.483
+forall	C_bm_NaChSTTR = 15.549
+
+forall	A_bh_NaChSTTR = 0.72          
+forall	B_bh_NaChSTTR = 23             
+forall	C_bh_NaChSTTR = 14
+
+forall	Vh_m_NaChSTTR = 9 
+forall	Vs_m_NaChSTTR = 12.56 
+forall	Vh_h_NaChSTTR = 32.71
+forall	Vs_h_NaChSTTR = 3.5
+
+forall	gnabar_NaChSTTR = 0.161*0.9
+forall	gkbar_KdelRec = 0.007
+forall	betanbarS_KdelRec = 0.017
+forall	alphanvh_KdelRec = 16
+
+
+/////////////////////////////// KChTransitIA
+forall	tauMmax_KChTransitIA = 1 
+forall	Vh1m_KChTransitIA = 35.82 
+forall	Vs1m_KChTransitIA = 19.69 
+forall	Vh2m_KChTransitIA = 79.69 
+forall	Vs2m_KChTransitIA = 12.2 
+forall	CMM_KChTransitIA = 0.37
+forall	VhMinf_KChTransitIA = 67
+forall	VsMinf_KChTransitIA = -1.5 
+forall	tauHmax_KChTransitIA = 1 
+forall	Vh1h_KChTransitIA = 46.05 
+forall	Vs1h_KChTransitIA = 0.67
+forall	Vh2h_KChTransitIA = 238.4 
+forall	Vs2h_KChTransitIA = 37.45 
+forall	CHH_KChTransitIA = 0
+forall	VhHinf_KChTransitIA = 88
+forall	VsHinf_KChTransitIA = 6
+forall	gkbar_KChTransitIA = 0.028
+
+////////////////////////// gkca
+forall		alphabar_gkca = 0.1
+forall		alphaB_gkca = 0.01
+forall		betabar_gkca = 0.043
+forall    gkcabar_gkca = 0.0015
+ 
+////////////////////////////// napump	
+		
+forall      ksteep_napump = 1
+forall		  vmax_napump = 0.003
+forall	   	khalf_napump = 12 
+
+////////////////////////////////CaCh
+
+forall		gcabar_cach = 2e-06
+
+///////////////////////////////////// CaPump
+
+forall tau_capump = 120 (ms)
+forall Ksrink_capump = 1
+
+//////////////////////////////// leak (static)
+
+forsec "axon" {	gl_leak = 0.00082
+                KCK_leak = -0.001
+	              el_leak = -45.6
+	}
+/*
+forsec "dendrt"	{ gl_leakDndrt = 0.002
+                  KCK_leakDndrt = -0.001 
+		              el_leakDndrt = -44
+	}
+*/	
+forall		cm = 1// C0  // static capacitance
+
+//____________________________________________________________________________________________________
+// TEMPERATURE COEF. Q10
+
+forall	amQ10NaTTXR_NaChSTTR = 3.8
+forall	bmQ10NaTTXR_NaChSTTR = 3.6
+forall	ahQ10NaTTXR_NaChSTTR = 2.5
+forall	bhQ10NaTTXR_NaChSTTR = 2.3
+forall	gbarQ10NaTTXR_NaChSTTR = 1.35
+
+forall	amQ10NaTTXR_NaChSTTS = 3.4
+forall	bmQ10NaTTXR_NaChSTTS = 3.2
+forall	ahQ10NaTTXR_NaChSTTS = 2.5
+forall	bhQ10NaTTXR_NaChSTTS = 2.3
+forall	gbarQ10NaTTXR_NaChSTTS = 1.35
+
+forall	Q10KdelRec_KdelRec = 2.3
+forall	gbQ10KdelRec_KdelRec = 1.35
+
+forall	Q10KiA_KChTransitIA = 2.75
+forall	gbQ10KiA_KChTransitIA = 1.44//
+forall	Q10KCa_gkca = 2.4 
+
+forsec "axon" {	
+				LeakTermCoef_leak = 1.44
+	}
+/*
+forsec "dendrt"	{ 
+				  LeakTermCoef_leakDndrt = 1.44
+	}
+*/	
+soma {
+el_leak = -36
+gl_leak = 0.00132
+KCK_leak = 0.001 
+LeakTermCoef_leak = 1.44 
+gkcabar_gkca = 0.00031 
+gkbar_KChTransitIA = 0.028
+gkbar_KdelRec = 0.003
+gnabar_NaChSTTS = 0.34*1.8 
+gcabar_cach = 1.2e-06
+tau_capump = 60
+}
+
+
+/*
+//_______________________________________________________________________________________________________	
+// MAKING THE GRADIENT CONDUCTIVITIES (in dendrites)	
+//COMMENT
+//gA =0.3(1 + d/100)  - A-type conductances (gA)  and 
+//gh =0.005(1 + 3d/100), as in previous 
+//models (Migliore et al. 2005), which are based on experimental data (Hoffman et al. 1997; Magee 1998).
+// 
+print "initial gkbar_KChTransitIA=", dendrt[0].gkbar_KChTransitIA
+{dendrt[0] distance(0, 1)} // origin is center of axon[0]
+{dendrt[banchsum-1] len = distance(1, 0)}
+j=banchsum-1
+while (j>0) {
+print j
+access dendrt[j]
+gkastart = (distance(1/(2*nseg)/10)/100+1)*gkbar_KChTransitIA*10 //*0.3
+print "gkastart =", gkastart
+gkaend = (1+distance(1-1/(2*nseg)/10)/100)*gkbar_KChTransitIA*10 //*0.3
+print "gkaend =", gkaend
+gkbar_KChTransitIA(1/(10*2*nseg):(1-1/(10*2*nseg))) = (gkastart):(gkaend)
+j=j-1
+}
+print "channels gradient is ok"
+*/	
+//TIME VECTOR			
+Tstart = 0			
+tstop = 5000
+dt = 0.025
+Delayx = 3000
+objref Vtime, Universal, Universall, Universalx, UniRamp, g, gg, ggg, TempRamp
+Vtime = new Vector()
+Vtime.indgen(Tstart,tstop,dt)
+print "timevector is ok   ", "length of vtime =", Vtime.size()
+Universalx = new Vector(Delayx/dt, 0)
+print "length of Universalx =", Universalx.size()
+UniRamp = new Vector((tstop-Delayx)/dt, 0)
+print "length of UniRamp =", UniRamp.size()
+UniRamp.indgen().scale(0, 1)
+Universal = new Vector()
+Universall = new Vector()
+Universall.append(Universalx, UniRamp)
+Universal.append(Universall,1)
+print "length of Universal =", Universal.size()
+
+objref MMWVUniv, MMWVUniv1, MMWVUniv0, LeakTermCoefV1, KsrinkCaPV2, KsrinkNaKPV2, KGKCabar, MMWg, MMWg2
+MMWVUniv1 = new Vector(Delayx/dt, 1)
+MMWVUniv0 = new Vector((tstop-Delayx)/dt+1, 0)
+MMWVUniv = new Vector()
+MMWVUniv.append(MMWVUniv1, MMWVUniv0)
+print "length of MMWVUniv =", MMWVUniv.size()
+
+MMWVUniv0.indgen().scale(0, 1)
+
+LeakTermCoefV1 = new Vector()
+KsrinkCaPV2 = new Vector()
+KsrinkNaKPV2 = new Vector()
+KGKCabar = new Vector()
+
+KGKCabar = MMWVUniv1.c.mul(gkcabar_gkca).c.append(MMWVUniv0.c.mul(gkcabar_gkca*Param1).c.add(gkcabar_gkca))
+KsrinkCaPV2 = MMWVUniv1.c.mul(Ksrink_capump).c.append(MMWVUniv0.c.mul(Ksrink_capump*Param3).c.add(Ksrink_capump)) // MMWVUniv1.append(MMWVUniv0)
+KsrinkNaKPV2 = MMWVUniv1.c.mul(Ksrink_napump).c.append(MMWVUniv0.c.mul(Ksrink_napump*Param2).c.add(Ksrink_napump)) //
+print "length of KsrinkCaPV2 =", KsrinkCaPV2.size()
+
+//KsrinkCaPV2.play("axon[8] {Ksrink_capump=$1}", Vtime)
+//KsrinkNaKPV2.play("axon[8] {Ksrink_napump=$1}", Vtime)
+//KGKCabar.play("axon[8] {gkcabar_gkca=$1}", Vtime)
+
+SetCelsius = 20 
+celsius = SetCelsius 
+deltacelsius = 10//3
+deltacelsiusLimit = 10//3
+print "SetCelsius= ", SetCelsius
+TempRamp  = new Vector(Universal.size())
+TempRamp = Universal.c.mul(deltacelsius).c.add(SetCelsius)
+print "TempRamp is ok   ", "length of TempRamp =", TempRamp.size()
+//limiting the temperature increase by Tfinal temperature to keep the simulation stable
+Tlimit = SetCelsius + deltacelsiusLimit 
+for iii=0, TempRamp.size()-1 {
+	 	if (TempRamp.x[iii]>Tlimit) { 
+		TempRamp.x[iii] = Tlimit	
+		}
+}		
+//print "length of TempRamp =", TempRamp.size()
+//g = new Graph()	
+//TempRamp.line(g)
+
+
+// PLAY WITH A TEMPERATURE
+//TempRamp.play(&celsius, Vtime) // if this is normal global temperature, activate this line
+// this is necessary to avoid the confusion with real temperature in the mechanisms
+forall s_celsius_KdelRec=0
+forall s_celsius_KChTransitIA=0
+forall s_celsius_leak=0
+forall s_celsius_NaChSTTS=0
+forall s_celsius_NaChSTTR=0
+forall s_celsius_na=0
+forall s_celsius_napump=0
+forall s_celsius_gkca=0
+forall s_celsius_ca=0
+forall s_celsius_cach=0
+forall s_celsius_capump=0
+// this chunk of code makes the focal emperature change
+TempRamp.play("axon[8] {s_celsius_KdelRec=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_KChTransitIA=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_leak=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_NaChSTTS=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_NaChSTTR=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_na=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_napump=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_gkca=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_ca=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_cach=$1}", Vtime)
+TempRamp.play("axon[8] {s_celsius_capump=$1}", Vtime)
+//	
+
+// PLAY WITH CAPASITANCE
+objref CapVec, UniversalCm
+CapVec = new Vector()
+UniversalCm = new Vector()
+deltacapsSR = 0.5 
+basecapsSR = 1 // cm initial
+UniversalCm.copy(TempRamp)
+UniversalCm.scale(0, 1)
+CapVec = UniversalCm.c.mul(deltacapsSR).c.add(basecapsSR)
+		
+//CapVec.play("forall cm=$1", Vtime)                                 // update the Cm as in tv every Dt
+//CapVec.play("soma {cml_leak=$1}", Vtime) 
+/*
+// PERSISTENT STIMULUS IN ALL DENDRITES (SAME)
+lastbranchnum = ns^n
+	objectvar STIM[lastbranchnum]
+	DelSer = 30
+	DuratSer = 10000
+for i = (banchsum-lastbranchnum), banchsum-1 {
+	dendrt[i] {STIM[i-(banchsum-lastbranchnum)] =  new IClamp(0.05)
+	STIM[i-(banchsum-lastbranchnum)].del = DelSer
+	STIM[i-(banchsum-lastbranchnum)].dur = DuratSer
+	STIM[i-(banchsum-lastbranchnum)].amp = 0.05} 
+}
+print "persiistent stimulses are ok"
+*/
+print "run the system is ok"
+//__________________________________________________________________________________________________________
+//GRAPHS FOR VOLTAGES
+objectvar save_window_, rvp_
+objectvar scene_vector_[6]
+objectvar ocbox_, ocbox_list_, scene_, scene_list_
+{ocbox_list_ = new List()  scene_list_ = new List()}
+{pwman_place(0,0,0)}
+{
+save_window_ = new Graph(0)
+save_window_.size(0,1000,-80,70)
+scene_vector_[2] = save_window_
+{save_window_.view(0, -80, 1000, 150, 456, 18, 831.6, 508.6)}
+graphList[0].append(save_window_)
+save_window_.save_name("graphList[0].")
+//save_window_.addexpr("v(.5)", 1, 1, 0.8, 0.9, 2)
+save_window_.addexpr("soma.v( 0.1 )", 1, 1, 0.8, 0.9, 2)
+save_window_.addexpr("axon[8].v( 0.9 )", 4, 1, 0.8, 0.9, 2)
+save_window_.addexpr("axon[26].v( 0.9 )", 5, 1, 0.8, 0.9, 2)
+save_window_.addexpr("axon[80].v( 0.9 )", 5, 1, 0.8, 0.9, 2)
+save_window_.addexpr("axon[11].v( 0.9 )", 3, 1, 0.8, 0.9, 2)
+save_window_.addexpr("axon[38].v( 0.9 )", 3, 1, 0.8, 0.9, 2)
+save_window_.addexpr("axon[120].v( 0.9 )", 3, 1, 0.8, 0.9, 2)
+save_window_.addexpr("celsius", 2, 1, 0.8, 0.9, 2)
+}
+//__________________________________________________________________________________________________________
+// SAVING THE DATA
+objref rect, recv, recTemp, recI, recLeak_dC
+
+rect = new Vector()
+rect.record(&t)
+recTemp = new Vector()
+recTemp.record(&celsius)
+recv = new Vector()
+recLeak_dC = new Vector()
+recI = new Vector()
+recv.record(&soma.v(0.5))
+recLeak_dC.record(&soma.il_leak(0.5))
+recI.record(&soma.i_cap(0.5))
+
+recsize = tstop/dt+1
+
+objref TimeTempSomaVI
+TimeTempSomaVI = new Matrix()
+TimeTempSomaVI.resize(recsize,5)
+
+
+objref VmatrixAxon, VmatrixDendrt, ImatrixAxon, ImatrixDendrt, IleakmatrixAxon, IleakmatrixDendrt
+VmatrixAxon = new Matrix()
+VmatrixAxon.resize(recsize,banchsumAxon+1)
+//VmatrixDendrt = new Matrix()
+//VmatrixDendrt.resize(recsize,banchsumDedrt+1)
+ImatrixAxon = new Matrix()
+ImatrixAxon.resize(recsize,banchsumAxon+1)
+//ImatrixDendrt = new Matrix()
+//ImatrixDendrt.resize(recsize,banchsumDedrt+1)
+IleakmatrixAxon = new Matrix()
+IleakmatrixAxon.resize(recsize,banchsumAxon+1)
+//IleakmatrixDendrt = new Matrix()
+//IleakmatrixDendrt.resize(recsize,banchsumDedrt+1)
+
+
+objref tempvecV, tempvecI, tempvecLeack
+objref listV, listI, listLeack
+listV = new List()
+listI = new List()
+listLeack = new List()
+
+for i=0,banchsumAxon-1 {
+tempvecV = new Vector()
+listV.append(tempvecV)
+tempvecI = new Vector()
+listI.append(tempvecI)
+tempvecLeack= new Vector()
+listLeack.append(tempvecLeack)
+}
+for i=0,banchsumAxon-1 {
+listV.o(i).record(&axon[i].v(0.5))
+listI.o(i).record(&axon[i].i_cap(0.5))
+listLeack.o(i).record(&axon[i].il_leak(0.5))
+}
+/*___________________________________________________
+objref listVd, listId, listLeackd
+listVd = new List()
+listId = new List()
+listLeackd = new List()
+
+for i=0,banchsumDedrt-1 {
+tempvecV = new Vector()
+listVd.append(tempvecV)
+tempvecI = new Vector()
+listId.append(tempvecI)
+tempvecLeack= new Vector()
+listLeackd.append(tempvecLeack)
+}
+for i=0,banchsumDedrt-1 {
+listVd.o(i).record(&dendrt[i].v(0.5))
+listId.o(i).record(&dendrt[i].i_cap(0.5))
+listLeackd.o(i).record(&dendrt[i].il_leakDndrt(0.5))
+}
+*/
+init()
+run()
+
+TimeTempSomaVI.setcol(0, rect)
+TimeTempSomaVI.setcol(1, recv)
+TimeTempSomaVI.setcol(2, recTemp)
+TimeTempSomaVI.setcol(3, recI)
+TimeTempSomaVI.setcol(4, recLeak_dC)
+
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Soma_Temp.txt")
+TimeTempSomaVI.fprint(savdata, "%g\t")
+savdata.close()
+
+
+VmatrixAxon.setcol(0, rect)
+for i=1, banchsumAxon {
+	VmatrixAxon.setcol(i-1, listV.o(i-1))
+	ImatrixAxon.setcol(i-1, listI.o(i-1))
+	IleakmatrixAxon.setcol(i-1, listLeack.o(i-1))
+	}
+/*	
+VmatrixDendrt.setcol(0, rect)
+for i=1, banchsumDedrt {
+	VmatrixDendrt.setcol(i-1, listVd.o(i-1))
+	ImatrixDendrt.setcol(i-1, listId.o(i-1))
+	IleakmatrixDendrt.setcol(i-1, listLeackd.o(i-1))
+	}
+*/
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Axons_V.txt")
+VmatrixAxon.fprint(savdata, " %g")
+savdata.close()
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Axons_I.txt")
+ImatrixAxon.fprint(savdata, " %g")
+savdata.close()
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Axons_Leak.txt")
+IleakmatrixAxon.fprint(savdata, " %g")
+savdata.close()
+/*
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Dendrt_V.txt")
+VmatrixDendrt.fprint(savdata, " %g")
+savdata.close()
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Dendrt_I.txt")
+ImatrixDendrt.fprint(savdata, " %g")
+savdata.close()
+objref savdata
+savdata = new File()
+savdata.wopen("DATA_Dendrt_Leak.txt")
+IleakmatrixDendrt.fprint(savdata, " %g")
+savdata.close()
+*/
+
+
+
+quit()
+
+
